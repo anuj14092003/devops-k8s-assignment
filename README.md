@@ -164,53 +164,87 @@ Verify the Collector:
 
 ## KloudMate Dashboard Verification
 
-The KloudMate workspace was used to verify application, Kafka, and Kubernetes infrastructure telemetry.
+The KloudMate workspace was used to verify application, Kafka, and Kubernetes infrastructure telemetry collected through OpenTelemetry.
 
 ### Application Monitoring
 
 The `devops-app` service was verified in KloudMate APM with:
 
-- Request throughput
+- Application throughput
 - Error rate
 - P95 and P99 latency
-- Requests and errors
-- Latency metrics
+- Requests and Errors
+- Latency trends
+- Two application hosts/pods
 
 ### Kafka Monitoring
 
-Kafka telemetry was verified using Kafka broker and consumer metrics, including consumer group offset and lag information.
+Kafka monitoring was verified using Strimzi Kafka Exporter metrics, including broker and consumer-group information.
+
+![Kafka Brokers](screenshots/kafka-brokers.png)
 
 ### Kubernetes Infrastructure Monitoring
 
-The following infrastructure metrics were verified in KloudMate Explore:
+The KloudMate dashboard contains Kubernetes infrastructure metrics collected using the OpenTelemetry Collector.
 
-- Kubernetes node CPU usage
-- Kubernetes node memory usage
-- Kubernetes pod CPU usage
-- Kubernetes pod memory usage
+#### Kubernetes Dashboard
 
-## Security
+![Kubernetes Dashboard](screenshots/kubernetes-dashboard.png)
 
-- KloudMate API credentials are stored in a Kubernetes Secret.
-- Credentials are not stored in source code.
-- `.env` files and secret-related files are excluded through `.gitignore`.
-- The repository contains only configuration and application code required to reproduce the assignment.
+#### Kubernetes Node CPU
 
-## Assignment Deliverables
+![Kubernetes Node CPU](screenshots/kubernetes-node-cpu.png)
 
-This repository contains:
+#### Kubernetes Node Memory
 
-- Node.js application source code
-- Dockerfile
-- Kubernetes Deployment and Service manifests
-- Apache Kafka and Strimzi configuration
-- Kafka topic, producer, consumer, and exporter configuration
+![Kubernetes Node Memory](screenshots/kubernetes-node-memory.png)
+
+#### Kubernetes Pod CPU
+
+![Kubernetes Pod CPU](screenshots/kubernetes-pod-cpu.png)
+
+#### Kubernetes Pod Memory
+
+![Kubernetes Pod Memory](screenshots/kubernetes-pod-memory.png)
+
+### Verified Metrics
+
+The following Kubernetes metrics were verified in KloudMate Explore:
+
+- `k8s_pod_cpu_time`
+- `k8s_pod_memory_usage`
+- `k8s_node_cpu_time`
+- `k8s_node_memory_usage`
+
+These metrics demonstrate monitoring of Kubernetes pod and node resource utilization.
+
+### Observability Architecture
+
+The monitoring flow is:
+
+Application / Kafka / Kubernetes
+→ OpenTelemetry Collector
+→ KloudMate
+→ Dashboards and APM
+
+### Assignment Deliverables
+
+The repository contains:
+
+- Kubernetes application manifests
+- Dockerfile and application source
+- Kafka deployment using Strimzi
+- Kafka producer and consumer
+- Kafka Exporter configuration
 - OpenTelemetry Collector configuration
-- Kubernetes RBAC configuration for telemetry collection
-- KloudMate observability integration
-- Setup and deployment documentation
+- Kubernetes RBAC configuration
+- Resource requests and limits
+- Readiness probe
+- KloudMate dashboard screenshots
+- Setup and deployment instructions
 
 ## Repository
 
-GitHub: https://github.com/anuj14092003/devops-k8s-assignment
+GitHub Repository:
 
+https://github.com/anuj14092003/devops-k8s-assignment
