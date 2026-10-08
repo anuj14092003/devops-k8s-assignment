@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-kafka-exporter
+  namespace: kafka
+spec:
+  selector:
+    strimzi.io/cluster: devops-kafka
+    strimzi.io/component-type: kafka-exporter
+  ports:
+    - name: metrics
+      port: 9404
+      targetPort: 9404
+      protocol: TCP

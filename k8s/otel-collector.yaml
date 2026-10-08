@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: observability
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          http:
+            endpoint: 0.0.0.0:4318
+
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: kafka-exporter
+              scrape_interval: 15s
+              static_configs:
+                - targets:
+                    - devops-kafka-exporter.kafka.svc.cluster.local:9404
+
+      kubeletstats:
+        collection_interval: 20s
+        auth_type: serviceAccount
+        endpoint: "https://${env:K8S_NODE_NAME}:10250"
+        insecure_skip_verify: true
+        metric_groups:
+          - node
+          - pod
+          - container
+
+    processors:
+      batch:
+
+    exporters:
+      otlphttp/kloudmate:
+        endpoint: https://otel.kloudmate.com:4318
+        headers:
+          Authorization: "Bearer ${env:KLOUDMATE_API_KEY}"
+
+    service:
+      pipelines:
+        metrics:
+          receivers:
+            - prometheus
+            - kubeletstats
+          processors:
+            - batch
+          exporters:
+            - otlphttp/kloudmate
+
+        traces:
+          receivers:
+            - otlp
+          processors:
+            - batch
+          exporters:
+            - otlphttp/kloudmate
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: observability
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: otel-collector
+
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+
+    spec:
+      serviceAccountName: otel-collector
+
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.139.0
+
+          args:
+            - "--config=/etc/otelcol-contrib/config.yaml"
+
+          env:
+            - name: KLOUDMATE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: kloudmate-credentials
+                  key: api-key
+
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+
+          ports:
+            - name: otlp-http
+              containerPort: 4318
+              protocol: TCP
+
+          volumeMounts:
+            - name: config
+              mountPath: /etc/otelcol-contrib
+
+      volumes:
+        - name: config
+          configMap:
+            name: otel-collector-config

@@ -1,0 +1,23 @@
+node_modules/
+.env
+.env.*
+!.env.example
+
+*.log
+
+.DS_Store
+Thumbs.db
+
+.vscode/
+.idea/
+
+dist/
+build/
+
+# Local Kubernetes / temporary files
+*.tmp
+*.bak
+
+# KloudMate / local secrets
+*secret*
+*credentials*
